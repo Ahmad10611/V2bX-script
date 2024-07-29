@@ -8,14 +8,14 @@ plain='\033[0m'
 cur_dir=$(pwd)
 
 # check root
-[[ $EUID -ne 0 ]] && echo -e "${red}خطا:${plain} باید با کاربر root این اسکریپت را اجرا کنید!\n" && exit 1
+[[ $EUID -ne 0 ]] && echo -e "${red}Error:${plain} This script must be run as root!\n" && exit 1
 
 # check os
 if [[ -f /etc/redhat-release ]]; then
     release="centos"
 elif cat /etc/issue | grep -Eqi "alpine"; then
     release="alpine"
-    echo -e "${red}اسکریپت در حال حاضر از سیستم alpine پشتیبانی نمی‌کند!${plain}\n" && exit 1
+    echo -e "${red}The script currently does not support alpine systems!${plain}\n" && exit 1
 elif cat /etc/issue | grep -Eqi "debian"; then
     release="debian"
 elif cat /etc/issue | grep -Eqi "ubuntu"; then
@@ -29,7 +29,7 @@ elif cat /proc/version | grep -Eqi "ubuntu"; then
 elif cat /proc/version | grep -Eqi "centos|red hat|redhat|rocky|alma|oracle linux"; then
     release="centos"
 else
-    echo -e "${red}نسخه سیستم عامل شناسایی نشد، لطفا با نویسنده اسکریپت تماس بگیرید!${plain}\n" && exit 1
+    echo -e "${red}Unable to detect system version, please contact the script author!${plain}\n" && exit 1
 fi
 
 arch=$(arch)
@@ -42,13 +42,13 @@ elif [[ $arch == "s390x" ]]; then
     arch="s390x"
 else
     arch="64"
-    echo -e "${red}شناسایی معماری ناموفق بود، استفاده از معماری پیش‌فرض: ${arch}${plain}"
+    echo -e "${red}Architecture detection failed, using default architecture: ${arch}${plain}"
 fi
 
-echo "معماری: ${arch}"
+echo "Architecture: ${arch}"
 
 if [ "$(getconf WORD_BIT)" != '32' ] && [ "$(getconf LONG_BIT)" != '64' ] ; then
-    echo "این نرم‌افزار از سیستم 32 بیتی (x86) پشتیبانی نمی‌کند، لطفا از سیستم 64 بیتی (x86_64) استفاده کنید. اگر شناسایی اشتباه است، با نویسنده تماس بگیرید."
+    echo "This software does not support 32-bit systems (x86), please use a 64-bit system (x86_64). If this detection is incorrect, please contact the author."
     exit 2
 fi
 
@@ -62,18 +62,18 @@ fi
 
 if [[ x"${release}" == x"centos" ]]; then
     if [[ ${os_version} -le 6 ]]; then
-        echo -e "${red}لطفا از CentOS 7 یا نسخه‌های بالاتر استفاده کنید!${plain}\n" && exit 1
+        echo -e "${red}Please use CentOS 7 or higher!${plain}\n" && exit 1
     fi
     if [[ ${os_version} -eq 7 ]]; then
-        echo -e "${red}توجه: CentOS 7 از پروتکل‌های hysteria1/2 پشتیبانی نمی‌کند!${plain}\n"
+        echo -e "${red}Note: CentOS 7 does not support hysteria1/2 protocols!${plain}\n"
     fi
 elif [[ x"${release}" == x"ubuntu" ]]; then
     if [[ ${os_version} -lt 16 ]]; then
-        echo -e "${red}لطفا از Ubuntu 16 یا نسخه‌های بالاتر استفاده کنید!${plain}\n" && exit 1
+        echo -e "${red}Please use Ubuntu 16 or higher!${plain}\n" && exit 1
     fi
 elif [[ x"${release}" == x"debian" ]]; then
     if [[ ${os_version} -lt 8 ]]; then
-        echo -e "${red}لطفا از Debian 8 یا نسخه‌های بالاتر استفاده کنید!${plain}\n" && exit 1
+        echo -e "${red}Please use Debian 8 or higher!${plain}\n" && exit 1
     fi
 fi
 
@@ -115,22 +115,22 @@ install_V2bX() {
     if  [ $# == 0 ] ;then
         last_version=$(curl -Ls "https://api.github.com/repos/Ahmad10611/V2bX/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
         if [[ ! -n "$last_version" ]]; then
-            echo -e "${red}شناسایی نسخه V2bX ناموفق بود، ممکن است از محدودیت API Github عبور کرده باشید، لطفا بعدا دوباره تلاش کنید، یا به صورت دستی نسخه V2bX را نصب کنید${plain}"
+            echo -e "${red}Failed to detect V2bX version, possibly exceeding Github API limit, please try again later, or manually specify V2bX version for installation${plain}"
             exit 1
         fi
-        echo -e "نسخه جدید V2bX شناسایی شد: ${last_version}، نصب آغاز شد"
+        echo -e "Detected the latest version of V2bX: ${last_version}, starting installation"
         wget -q -N --no-check-certificate -O /usr/local/V2bX/V2bX-linux.zip https://github.com/Ahmad10611/V2bX/releases/download/${last_version}/V2bX-linux-${arch}.zip
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}دانلود V2bX ناموفق بود، لطفا مطمئن شوید که سرور شما قادر به دانلود فایل‌های Github است${plain}"
+            echo -e "${red}Failed to download V2bX, please ensure your server can download files from Github${plain}"
             exit 1
         fi
     else
         last_version=$1
         url="https://github.com/Ahmad10611/V2bX/releases/download/${last_version}/V2bX-linux-${arch}.zip"
-        echo -e "نصب V2bX $1 آغاز شد"
+        echo -e "Starting installation of V2bX $1"
         wget -q -N --no-check-certificate -O /usr/local/V2bX/V2bX-linux.zip ${url}
         if [[ $? -ne 0 ]]; then
-            echo -e "${red}دانلود V2bX $1 ناموفق بود، لطفا مطمئن شوید که این نسخه وجود دارد${plain}"
+            echo -e "${red}Failed to download V2bX $1, please ensure this version exists${plain}"
             exit 1
         fi
     fi
@@ -146,14 +146,14 @@ install_V2bX() {
     systemctl daemon-reload
     systemctl stop V2bX
     systemctl enable V2bX
-    echo -e "${green}V2bX ${last_version}${plain} نصب شد، تنظیم شد برای شروع به کار در هنگام روشن شدن سیستم"
+    echo -e "${green}V2bX ${last_version}${plain} installed, set to start on boot"
     cp geoip.dat /etc/V2bX/
     cp geosite.dat /etc/V2bX/
 
     if [[ ! -f /etc/V2bX/config.json ]]; then
         cp config.json /etc/V2bX/
         echo -e ""
-        echo -e "نصب جدید، لطفا ابتدا آموزش را مشاهده کنید: https://v2bx.v-50.me/ و موارد ضروری را پیکربندی کنید"
+        echo -e "Fresh installation, please first refer to the tutorial: https://v2bx.v-50.me/ and configure the necessary content"
         first_install=true
     else
         systemctl start V2bX
@@ -161,9 +161,9 @@ install_V2bX() {
         check_status
         echo -e ""
         if [[ $? == 0 ]]; then
-            echo -e "${green}V2bX با موفقیت راه‌اندازی شد${plain}"
+            echo -e "${green}V2bX restarted successfully${plain}"
         else
-            echo -e "${red}V2bX ممکن است راه‌اندازی نشود، لطفا بعدا با استفاده از V2bX log اطلاعات لاگ را مشاهده کنید، اگر نمی‌تواند راه‌اندازی شود، ممکن است فرمت پیکربندی تغییر کرده باشد، لطفا به ویکی مراجعه کنید: https://github.com/V2bX-project/V2bX/wiki${plain}"
+            echo -e "${red}V2bX may have failed to start, please check the log information using V2bX log later. If it still does not start, the configuration format may have changed. Please refer to the wiki: https://github.com/V2bX-project/V2bX/wiki${plain}"
         fi
         first_install=false
     fi
@@ -189,27 +189,27 @@ install_V2bX() {
     cd $cur_dir
     rm -f install.sh
     echo -e ""
-    echo "نحوه استفاده از اسکریپت مدیریت V2bX (سازگار با استفاده از V2bX، حساس به حروف بزرگ و کوچک نیست): "
+    echo "How to use the V2bX management script (compatible with using V2bX, case insensitive): "
     echo "------------------------------------------"
-    echo "V2bX              - نمایش منوی مدیریت (ویژگی‌های بیشتر)"
-    echo "V2bX start        - شروع V2bX"
-    echo "V2bX stop         - متوقف کردن V2bX"
-    echo "V2bX restart      - راه‌اندازی مجدد V2bX"
-    echo "V2bX status       - مشاهده وضعیت V2bX"
-    echo "V2bX enable       - تنظیم V2bX برای شروع به کار هنگام روشن شدن سیستم"
-    echo "V2bX disable      - لغو تنظیم شروع به کار V2bX هنگام روشن شدن سیستم"
-    echo "V2bX log          - مشاهده لاگ‌های V2bX"
-    echo "V2bX x25519       - تولید کلید x25519"
-    echo "V2bX generate     - تولید فایل پیکربندی V2bX"
-    echo "V2bX update       - به‌روزرسانی V2bX"
-    echo "V2bX update x.x.x - به‌روزرسانی V2bX به نسخه مشخص"
-    echo "V2bX install      - نصب V2bX"
-    echo "V2bX uninstall    - حذف V2bX"
-    echo "V2bX version      - مشاهده نسخه V2bX"
+    echo "V2bX              - Show management menu (more features)"
+    echo "V2bX start        - Start V2bX"
+    echo "V2bX stop         - Stop V2bX"
+    echo "V2bX restart      - Restart V2bX"
+    echo "V2bX status       - Check V2bX status"
+    echo "V2bX enable       - Enable V2bX to start on boot"
+    echo "V2bX disable      - Disable V2bX to start on boot"
+    echo "V2bX log          - View V2bX logs"
+    echo "V2bX x25519       - Generate x25519 keys"
+    echo "V2bX generate     - Generate V2bX configuration file"
+    echo "V2bX update       - Update V2bX"
+    echo "V2bX update x.x.x - Update V2bX to the specified version"
+    echo "V2bX install      - Install V2bX"
+    echo "V2bX uninstall    - Uninstall V2bX"
+    echo "V2bX version      - Check V2bX version"
     echo "------------------------------------------"
-    # پرسش نصب اولیه در مورد تولید فایل پیکربندی
+    # First install prompt for generating config file
     if [[ $first_install == true ]]; then
-        read -rp "شناسایی شد که اولین نصب V2bX شما است، آیا می‌خواهید به طور خودکار فایل پیکربندی را تولید کنید؟ (y/n): " if_generate
+        read -rp "Detected that this is your first installation of V2bX, do you want to automatically generate the configuration file? (y/n): " if_generate
         if [[ $if_generate == [Yy] ]]; then
             curl -o ./initconfig.sh -Ls https://raw.githubusercontent.com/Ahmad10611/V2bX-script/master/initconfig.sh
             source initconfig.sh
@@ -219,6 +219,6 @@ install_V2bX() {
     fi
 }
 
-echo -e "${green}شروع نصب${plain}"
+echo -e "${green}Starting installation${plain}"
 install_base
 install_V2bX $1
